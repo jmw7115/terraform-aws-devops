@@ -1,0 +1,34 @@
+{
+    "rates": [
+        {
+            "rateId": 1,
+            "Type": "car",
+            "Rate": "0.5",
+            "Date": "2021-04-21",
+        },
+        {
+            "rateId": 2,
+            "Type": "house 30 year",
+            "Rate": "0.5",
+            "Date": "2021-04-21",
+        },
+        {
+            "rateId": 3,
+            "Type": "house 15 year",
+            "Rate": "0.5",
+            "Date": "2021-04-21",
+        },
+        {
+            "rateId": 4,
+            "Type": "credit card",
+            "Rate": "0.5",
+            "Date": "2021-04-21",
+        },
+        {
+            "rateId": 5,
+            "Type": "busieness loan",
+            "Rate": "0.5",
+            "Date": "2021-04-21",
+        }
+    ]
+}
