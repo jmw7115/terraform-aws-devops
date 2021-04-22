@@ -12,7 +12,7 @@ provider "aws" { # terraform aws provider
   region  = var.aws_region
 }
 
-######## S3 Bucket to store files
+######## S3 Bucket Resources to store files
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object
 
 resource "aws_s3_bucket" "data-bucket" {
@@ -93,3 +93,101 @@ resource "aws_s3_bucket_policy" "data-bucket-policy" {
   })
 }
 
+######## Lambda Resources
+
+# Not 100% sure about the roles and policies
+# Need to review
+
+resource "aws_iam_role" "lambda_execute_role" {
+  name = "${var.project_name}-lambda-role"
+
+  assume_role_policy = <<-POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+POLICY
+}
+
+
+# Took the easy way out and add all S3,
+# Not the most secure, needs more work.
+resource "aws_iam_policy" "lambda_policy" {
+  name        = "${var.project_name}-lambda-policy"
+  description = "Policy for S3 Resource Access"
+
+  policy = <<-POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "s3*"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::${var.project_name}-bucket"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy_attachment" "lambda-attach" {
+  role       = aws_iam_role.lambda_execute_role.name
+  policy_arn = aws_iam_policy.lambda_policy.arn
+}
+
+
+# Reference: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function
+# https://github.com/hashicorp/terraform/issues/27774
+# https://docs.aws.amazon.com/lambda/latest/dg/python-handler.html
+
+# This works but need to git role into arn variable
+resource "aws_lambda_function" "query-data-lambda" {
+  function_name = "data-query-function"
+  # role          = "arn:aws:iam::418788601002:role/jmw7115-devops-challenge-lambda-role"
+  role          = "${aws_iam_role.lambda_execute_role.arn}"
+  filename      = "src/lambda/data-query-function/lambda_function.py.zip"
+  handler       = "lambda_function.lambda_handler"
+  runtime = "python3.8"
+
+}
+
+# resource "aws_lambda_function" "lambda_2" {
+#   filename      = "jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip"
+#   function_name = "lambda_2"
+#   role          = aws_iam_role.lambda_role.arn
+#   # handler       = "hello kitty"
+#   # The filebase64sha256() function is available in Terraform 0.11.12 and later
+#   # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
+#   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
+#   # source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
+#   source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
+
+#   runtime = "python3.8"
+
+# }
+
+# resource "aws_lambda_function" "lambda_3" {
+#   filename      = "jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip"
+#   function_name = "lambda_3"
+#   role          = aws_iam_role.lambda_role.arn
+#   # handler       = "hello kitty"
+#   # The filebase64sha256() function is available in Terraform 0.11.12 and later
+#   # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
+#   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
+#   # source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
+#   source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
+
+#   runtime = "python3.8"
+
+# }
