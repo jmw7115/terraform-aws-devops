@@ -75,27 +75,6 @@ resource "aws_s3_bucket_object" "rates-file-upload" {
 
 ## Access to S3 Bucket Policy
 
-# resource "aws_s3_bucket_policy" "data-bucket-policy" {
-#   bucket = aws_s3_bucket.data-bucket.id
-
-#   # This needs more work ... -jw
-#   policy = <<POLICY
-# {
-#   "Id": "Policy1619122712422",
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Sid": "Stmt1619122700502",
-#       "Action": "s3:*",
-#       "Effect": "Allow",
-#       "Resource": "arn:aws:s3:::${var.project_name}-bucket/*",
-#       "Principal": "*"
-#     }
-#   ]
-# }
-# POLICY
-# }
-
 resource "aws_s3_bucket_policy" "data-bucket-policy" {
   bucket = aws_s3_bucket.data-bucket.id
 
@@ -113,3 +92,4 @@ resource "aws_s3_bucket_policy" "data-bucket-policy" {
     ]
   })
 }
+
