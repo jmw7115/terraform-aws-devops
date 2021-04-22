@@ -64,7 +64,7 @@ resource "aws_s3_bucket_object" "archive-data-folder" {
 ## Upload the initial file
 resource "aws_s3_bucket_object" "rates-file-upload" {
   bucket = aws_s3_bucket.data-bucket.id
-  key    = "data.csv"
+  key    = "Active-Data/data.csv"
   source = "data-files/data.csv"
 
   # The filemd5() function is available in Terraform 0.11.12 and later
