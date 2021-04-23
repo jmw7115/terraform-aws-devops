@@ -154,16 +154,15 @@ resource "aws_iam_role_policy_attachment" "lambda-attach" {
 # This works but need to git role into arn variable
 # Not sure where I should place the local zip for the function function.
 # More research needed.
+# Answer: You cd into the src directory and zip the file.
 resource "aws_lambda_function" "query-data-lambda" {
   function_name = "data-query-function"
-  # role          = "arn:aws:iam::418788601002:role/jmw7115-devops-challenge-lambda-role"
   role          = "${aws_iam_role.lambda_execute_role.arn}"
-  filename      = "lambda_function.py.zip"
+  filename      = "src/lambda/data-query-function/lambda_function.py.zip"
   handler       = "lambda_function.lambda_handler"
   runtime = "python3.8"
 
 }
-
 
 
 
