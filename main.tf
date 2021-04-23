@@ -157,11 +157,12 @@ resource "aws_iam_role_policy_attachment" "lambda-attach" {
 # Answer: You cd into the src directory and zip the file.
 resource "aws_lambda_function" "query-data-lambda" {
   function_name = "data-query-function"
+  description = "s3 select actions on active data file."
   role          = "${aws_iam_role.lambda_execute_role.arn}"
   filename      = "src/lambda/data-query-function/lambda_function.py.zip"
   handler       = "lambda_function.lambda_handler"
   runtime = "python3.8"
-
+  source_code_hash = filebase64sha256("src/lambda/data-query-function/lambda_function.py.zip")
 }
 
 
