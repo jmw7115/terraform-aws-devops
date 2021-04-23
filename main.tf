@@ -33,6 +33,14 @@ resource "aws_s3_bucket" "data-bucket" {
 
 }
 
+## Block public access to the S3 bucket
+
+resource "aws_s3_bucket_public_access_block" "data-bucket" {
+  bucket = aws_s3_bucket.data-bucket.id
+  block_public_acls   = true
+  block_public_policy = true
+}
+
 # Bucket resource for data uploads
 # This folder will need a trigger to append the data
 # to the active data file in Active-Data/data.csv.
@@ -72,6 +80,7 @@ resource "aws_s3_bucket_object" "rates-file-upload" {
   # etag = "${md5(file("path/to/file"))}"
   # etag = filemd5("path/to/file")
 }
+
 
 ## Access to S3 Bucket Policy
 
@@ -165,34 +174,24 @@ resource "aws_lambda_function" "query-data-lambda" {
   source_code_hash = filebase64sha256("src/lambda/data-query-function/lambda_function.py.zip")
 }
 
+resource "aws_lambda_function" "upload-file-lambda" {
+  function_name = "upload-file-function"
+  description = "uploads file to <bucket>/Input-Data."
+  role          = "${aws_iam_role.lambda_execute_role.arn}"
+  filename      = "src/lambda/upload-file-function/lambda_function.py.zip"
+  handler       = "lambda_function.lambda_handler"
+  runtime = "python3.8"
+  source_code_hash = filebase64sha256("src/lambda/upload-file-function/lambda_function.py.zip")
+}
+
+resource "aws_lambda_function" "s3-trigger-lambda" {
+  function_name = "s3-trigger-function"
+  description = "when file is uploaded, trigger will append data to active data and archive"
+  role          = "${aws_iam_role.lambda_execute_role.arn}"
+  filename      = "src/lambda/s3-trigger-function/lambda_function.py.zip"
+  handler       = "lambda_function.lambda_handler"
+  runtime = "python3.8"
+  source_code_hash = filebase64sha256("src/lambda/data-query-function/lambda_function.py.zip")
+}
 
 
-# resource "aws_lambda_function" "lambda_2" {
-#   filename      = "jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip"
-#   function_name = "lambda_2"
-#   role          = aws_iam_role.lambda_role.arn
-#   # handler       = "hello kitty"
-#   # The filebase64sha256() function is available in Terraform 0.11.12 and later
-#   # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
-#   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
-#   # source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
-#   source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
-
-#   runtime = "python3.8"
-
-# }
-
-# resource "aws_lambda_function" "lambda_3" {
-#   filename      = "jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip"
-#   function_name = "lambda_3"
-#   role          = aws_iam_role.lambda_role.arn
-#   # handler       = "hello kitty"
-#   # The filebase64sha256() function is available in Terraform 0.11.12 and later
-#   # For Terraform 0.11.11 and earlier, use the base64sha256() function and the file() function:
-#   # source_code_hash = "${base64sha256(file("lambda_function_payload.zip"))}"
-#   # source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
-#   source_code_hash = filebase64sha256("jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip")
-
-#   runtime = "python3.8"
-
-# }
