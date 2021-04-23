@@ -9,6 +9,11 @@ def lambda_handler(event, context):
     #try:
         #print("passed in event: {}".format(event))
         #print(event['query'])
+        ## This block queries the file using s3 select
+        
+        # Can I pass following in???? Most likely yes!!!
+        BUCKET_NAME = "jmw7115-dea-challenge-bucket"
+        BUCKET_KEY = "Active-Data/data.csv"  
         
         x = datetime.datetime.now()
         today = x.strftime("%G-%m-%d")
@@ -34,15 +39,13 @@ def lambda_handler(event, context):
             
         htmlTableStart = "<table class=\"center\"><tr><th>Type</th><th>Rate</th><th>Date</th></tr>"
 
-        ## This block queries the file using s3 select
-        BUCKET_NAME = 'jmw7115-devops-challenge-bucket'
-        KEY = 'data.csv'  
+        
         s3 = boto3.client('s3','us-east-2')
         selectField = "Date"
         selectFieldValue = "2021-04-21"
         response = s3.select_object_content(
-            Bucket = 'jmw7115-devops-challenge-bucket',
-            Key = 'Active-data/data.csv',
+            Bucket = BUCKET_NAME,
+            Key = BUCKET_KEY,
             ExpressionType = 'SQL',
             Expression = "SELECT * FROM s3object s where s.\"Type\" = 'car'",
             #Expression = "SELECT * FROM s3object s where s.\"{}\" = '{}'".format(selectField,selectFieldValue),
