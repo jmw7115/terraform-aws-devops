@@ -40,7 +40,7 @@ def lambda_handler(event, context):
         selectFieldValue = "2021-04-21"
         response = s3.select_object_content(
             Bucket = 'jmw7115-devops-challenge-bucket',
-            Key = 'data.csv',
+            Key = 'Active-data/data.csv',
             ExpressionType = 'SQL',
             Expression = "SELECT * FROM s3object s where s.\"Type\" = 'car'",
             #Expression = "SELECT * FROM s3object s where s.\"{}\" = '{}'".format(selectField,selectFieldValue),
