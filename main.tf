@@ -131,7 +131,7 @@ resource "aws_iam_policy" "lambda_policy" {
   "Statement": [
     {
       "Action": [
-        "s3*"
+        "s3:*"
       ],
       "Effect": "Allow",
       "Resource": "arn:aws:s3:::${var.project_name}-bucket"
@@ -152,15 +152,20 @@ resource "aws_iam_role_policy_attachment" "lambda-attach" {
 # https://docs.aws.amazon.com/lambda/latest/dg/python-handler.html
 
 # This works but need to git role into arn variable
+# Not sure where I should place the local zip for the function function.
+# More research needed.
 resource "aws_lambda_function" "query-data-lambda" {
   function_name = "data-query-function"
   # role          = "arn:aws:iam::418788601002:role/jmw7115-devops-challenge-lambda-role"
   role          = "${aws_iam_role.lambda_execute_role.arn}"
-  filename      = "src/lambda/data-query-function/lambda_function.py.zip"
+  filename      = "lambda_function.py.zip"
   handler       = "lambda_function.lambda_handler"
   runtime = "python3.8"
 
 }
+
+
+
 
 # resource "aws_lambda_function" "lambda_2" {
 #   filename      = "jmw7115-project-1-select-all-function-7c276612-6bd0-4944-8cb8-a08fc400e659.zip"
