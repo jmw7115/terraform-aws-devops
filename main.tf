@@ -164,6 +164,9 @@ resource "aws_iam_role_policy_attachment" "lambda-attach" {
 # Not sure where I should place the local zip for the function function.
 # More research needed.
 # Answer: You cd into the src directory and zip the file.
+
+## Function to query the data file.
+
 resource "aws_lambda_function" "query-data-lambda" {
   function_name = "data-query-function"
   description = "s3 select actions on active data file."
@@ -174,24 +177,91 @@ resource "aws_lambda_function" "query-data-lambda" {
   source_code_hash = filebase64sha256("src/lambda/data-query-function/lambda_function.py.zip")
 }
 
+## Function to upload a file.
+
 resource "aws_lambda_function" "upload-file-lambda" {
   function_name = "upload-file-function"
   description = "uploads file to <bucket>/Input-Data."
   role          = "${aws_iam_role.lambda_execute_role.arn}"
   filename      = "src/lambda/upload-file-function/lambda_function.py.zip"
   handler       = "lambda_function.lambda_handler"
-  runtime = "python3.8"
+  runtime       = "python3.8"
   source_code_hash = filebase64sha256("src/lambda/upload-file-function/lambda_function.py.zip")
 }
+
+# resource "aws_lambda_function" "s3-trigger-lambda" {
+#   function_name = "s3-trigger-function"
+#   description = "when file is uploaded, trigger will append data to active data and archive"
+#   role          = "${aws_iam_role.lambda_execute_role.arn}"
+#   filename      = "src/lambda/s3-trigger-function/lambda_function.py.zip"
+#   handler       = "lambda_function.lambda_handler"
+#   runtime       = "python3.8"
+#   source_code_hash = filebase64sha256("src/lambda/data-query-function/lambda_function.py.zip")
+# }
+
+# resource "aws_s3_bucket_notification" "bucket_notification" {
+#   bucket = aws_s3_bucket.data-bucket.id
+
+#   lambda_function {
+#     lambda_function_arn = aws_lambda_function.s3-trigger-lambda.arn
+#     events              = ["s3:ObjectCreated:*"]
+#     filter_prefix       = "Input-Data/"
+#     filter_suffix       = ""
+#   }
+
+#   depends_on = [aws_lambda_permission.allow_bucket]
+# }
+
+# resource "aws_iam_role" "iam_for_lambda" {
+#   name = "iam_for_lambda"
+
+#   assume_role_policy = <<EOF
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#     {
+#       "Action": "sts:AssumeRole",
+#       "Principal": {
+#         "Service": "lambda.amazonaws.com"
+#       },
+#       "Effect": "Allow"
+#     }
+#   ]
+# }
+# EOF
+# }
+
+## Reference: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_notification
+
+resource "aws_lambda_permission" "allow_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.s3-trigger-lambda.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.data-bucket.arn
+}
+
+## Function to copy uploaded file to Archive-Data/
 
 resource "aws_lambda_function" "s3-trigger-lambda" {
   function_name = "s3-trigger-function"
   description = "when file is uploaded, trigger will append data to active data and archive"
-  role          = "${aws_iam_role.lambda_execute_role.arn}"
+  role          = aws_iam_role.lambda_execute_role.arn
   filename      = "src/lambda/s3-trigger-function/lambda_function.py.zip"
   handler       = "lambda_function.lambda_handler"
-  runtime = "python3.8"
+  runtime       = "python3.8"
   source_code_hash = filebase64sha256("src/lambda/data-query-function/lambda_function.py.zip")
 }
 
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = aws_s3_bucket.data-bucket.id
 
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.s3-trigger-lambda.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "Archive-Data/"
+    filter_suffix       = ""
+  }
+
+  depends_on = [aws_lambda_permission.allow_bucket]
+}
