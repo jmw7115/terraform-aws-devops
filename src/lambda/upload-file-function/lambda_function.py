@@ -21,3 +21,27 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': json.dumps('file is created in:'+dest_file_name)
     }
+
+
+### test event
+# {
+#   "fileName": "test_file_3.csv",
+#   "srcPath": "/tmp/",
+#   "bucketName": "jmw7115-dea-challenge-bucket",
+#   "s3Path": "Input-Data/"
+# }
+
+### post html
+# <!DOCTYPE html>
+# <html>
+# <body>
+
+# <p>Click on the "Choose File" button to upload a file:</p>
+
+# <form action="/action_page.php">
+#   <input type="file" id="myFile" name="filename">
+#   <input type="submit">
+# </form>
+
+# </body>
+# </html>
