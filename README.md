@@ -14,16 +14,18 @@ This application will use several AWS services to store and retrieve data from a
     - [Create a Free AWS Accout](https://aws.amazon.com/free/)
 
 
-### Application Workflow
+### Application Process Flow
 <br>
 
 ![AWS DevOPS Scenario](aws-devops.png)
 
 1. Users access the AWS API gateway using a web browser.
-2. The API gateway performs the request, either GET or POST, to the AWS Lambda function. 
-3. The Lambda function(s) calls the event handler and acts on the data file stored in the S3 bucket.
-4. The Lambda function returns the results to the API gateway.
-5. The API renders the results to the user's browser. 
+2. The browser sends a request to the API gateway resource.
+3. The API gateway performs the request, either GET or POST, to the AWS Lambda function. 
+4. The Lambda function(s) calls the event handler to interact with the S3 API to perform an action on the data file (e., an S3 Select) stored or soon to be held in the S3 bucket.
+5. The S3 client returns a response for the Lambda function to process.
+7. The Lambda function returns a result to the API gateway.
+6. The API renders the results to the user's browser.
 
 
 ### AWS S3 Storage
